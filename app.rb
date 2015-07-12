@@ -17,7 +17,7 @@ get '/' do
     erb :secured
   else
     store[user_id] = RandomWord.adjs.next + " " + RandomWord.adjs.next unless store[user_id]
-    `cd public/captchas && ../opencv-files/build/imp-captcha #{store[user_id]}`
+    `cd public/captchas && ../opencv-files/build/imp-captcha "#{store[user_id]}"`
     @phrase = store[user_id]
     erb :input
   end
