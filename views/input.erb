@@ -5,7 +5,7 @@
     <title>Insert captcha</title>
 </head>
 <body>
-<%= "DEBUG: " + @phrase %>
+<img src="/captchas/<%= @phrase %>.jpg" alt=""/>
 <form action="/captcha" method="get">
     <input type="text" name="captcha_input" placeholder="Please insert captcha code"/>
     <button type="submit">Check captcha</button>
