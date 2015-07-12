@@ -163,8 +163,8 @@ int main(int argc, char *argv[])
 
 //bitwise_not ( outImage, outImage );
     addCircle(outImage);
-    imshow("Captcha11", outImage);
-    waitKey(0);
+//    imshow("Captcha11", outImage);
+//    waitKey(0);
     imwrite( inputWord+".jpg", outImage );
     return EXIT_SUCCESS;
 }
