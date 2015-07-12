@@ -21,6 +21,7 @@ GEM
     eventmachine (1.0.7)
     http_parser.rb (0.6.0)
     moneta (0.8.0)
+    os (0.9.6)
     rack (1.6.4)
     rack-fiber_pool (0.9.3)
     rack-protection (1.5.3)
@@ -47,6 +48,7 @@ DEPENDENCIES
   byebug
   erubis
   moneta
+  os
   rake
   random-word
   sinatra
