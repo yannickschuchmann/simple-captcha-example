@@ -5,8 +5,8 @@
 #include <cstdlib>
 #include <ctime>
 
-using namespace cv;
 using namespace std;
+using namespace cv;
 
 const Scalar WHITE = CV_RGB(255,255,255);
 int       CAPTCHA_LENGTH = 8;
