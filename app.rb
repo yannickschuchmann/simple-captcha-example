@@ -12,12 +12,18 @@ use Rack::Session::Cookie, :secret => 'FURFM-SCHNAPS'
 store = Moneta.new(:Memory)
 ACCEPTED = "accepted_"
 
+def create_captcha_text
+  # RandomWord.adjs.next + " " + RandomWord.nouns.next
+  RandomWord.adjs.next
+end
+
+
 get '/' do
   user_id = session['user_id'] = session[:user_id] || SecureRandom.hex
   if store.key?(ACCEPTED + user_id)
     erb :secured
   else
-    store[user_id] = RandomWord.adjs.next + " " + RandomWord.adjs.next unless store[user_id]
+    store[user_id] = create_captcha_text unless store[user_id]
 
     if OS.mac?
       captcha_generator = "imp-captcha_osx"
@@ -34,5 +40,11 @@ end
 get '/captcha' do
   user_id = session[:user_id]
   store[ACCEPTED + user_id] = true if store[user_id] == params[:captcha_input]
+  redirect to('/')
+end
+
+get '/reload' do
+  user_id = session['user_id'] = session[:user_id] || SecureRandom.hex
+  store[user_id] = create_captcha_text
   redirect to('/')
 end
