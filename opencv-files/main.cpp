@@ -8,7 +8,7 @@
 using namespace std;
 using namespace cv;
 
-const Scalar WHITE = CV_RGB(255,255,255);
+const Scalar WHITE = Scalar(255,255,255,0);
 int       CAPTCHA_LENGTH = 8;
 const int         CHAR_HEIGHT = 100;
 const int         CHAR_WIDTH  = 80;
@@ -55,7 +55,7 @@ void addLines(Mat &image) {
         cv::line(image,
             cv::Point(startX, startY),
             cv::Point(endX, endY),
-            Scalar(rng.uniform(0, 256),rng.uniform(0, 256),rng.uniform(0, 256)),
+            Scalar(255,255,255),
             rng.uniform(0, 3), CV_AA); // anti-alias
     }
 }
@@ -114,16 +114,12 @@ void addCircle(Mat &image) {
     j = image.rows / 2;
     Point center(i, j);
 
-    ellipse( image, center, Size( ( rand() % 90 ),  ( rand() % 150 )  ), 45, 0, 360, Scalar( 0, 0, 0 ), -2, 8 );
+    ellipse( image, center, Size( ( rand() % 90 ),  ( rand() % 150 )  ), rand() % 25, 0, 360, Scalar( 0, 0, 0 ), -2, 8 );
     i = image.cols - 100;
     j = image.rows / 2;
     Point second(i, j);
-    ellipse( image, second, Size( ( rand() % 120 ), ( rand() % 90 ) ), rand() % 45, 0, 360, Scalar( 0, 0, 0 ), -2, 8 );
-
-//    circle(image, center, image.rows/2 - 10,
-//        Scalar(0,0,0),
-//        -2,
-//        CV_AA);
+    ellipse( image, second, Size( ( rand() % 90 ), ( rand() % 90 ) ), rand() % 20, 0, 360, Scalar( 0, 0, 0 ), -2, 8 );
+    bitwise_or ( image, image, image );
 }
 
 int main(int argc, char *argv[])
@@ -137,9 +133,11 @@ int main(int argc, char *argv[])
     srand((unsigned)time(0));
     rand();
     RNG rng(rand());
-
+    int randomChooser = rand() % inputWord.size();
 
     Scalar color = CV_RGB(0, 0, 0); //255, 127, 80);
+
+//    addCircle(outImage);
 
     for (std::string::size_type i = 0; i < inputWord.size(); i++) {
         cv::Mat charImage(CHAR_HEIGHT, CHAR_WIDTH, CV_8UC3, WHITE);
@@ -154,17 +152,29 @@ int main(int argc, char *argv[])
 //        imshow("rotate",charImage);
         scale(charImage, charImage, CHAR_HEIGHT, CHAR_WIDTH);
 //        imshow("scale",charImage);
+        if(i % 2 == 0) {
 
+            bitwise_not(charImage, charImage);
+        }
         charImage.copyTo(outImage(cv::Rect(CHAR_WIDTH * i, 0, charImage.cols, charImage.rows)));
 //        waitKey(0);
     }
 
 //    addLines(outImage);
 
-//bitwise_not ( outImage, outImage );
-    addCircle(outImage);
-//    imshow("Captcha11", outImage);
-//    waitKey(0);
+    cout << rand() % inputWord.size() <<endl;
+
+    if (randomChooser % 2 == 0) {
+        addLines(outImage);
+    }
+
+    if (randomChooser == 0) {
+        addNoise(outImage);
+    }
+
+
+    imshow("Captcha11", outImage);
+    waitKey(0);
     imwrite( inputWord+".jpg", outImage );
     return EXIT_SUCCESS;
 }
