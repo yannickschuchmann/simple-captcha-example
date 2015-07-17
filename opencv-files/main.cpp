@@ -8,10 +8,10 @@
 using namespace std;
 using namespace cv;
 
-const Scalar WHITE = Scalar(255,255,255,0);
-int       CAPTCHA_LENGTH;
-const int         CHAR_HEIGHT = 100;
-const int         CHAR_WIDTH  = 80;
+
+int       LENGTH;
+const int         HEIGHT = 100;
+const int         WIDTH  = 80;
 
 void rotate(Mat &input, Mat &output) {
 
@@ -26,7 +26,7 @@ void rotate(Mat &input, Mat &output) {
     Mat rotationMatrix = getRotationMatrix2D(center, angle, 1.0);
 
     warpAffine(input, output, rotationMatrix, input.size(),
-        INTER_LINEAR, BORDER_CONSTANT, WHITE);
+        INTER_LINEAR, BORDER_CONSTANT, Scalar(255,255,255,0));
 
 }
 
@@ -53,7 +53,7 @@ void addLines(Mat &image) {
             cv::Point(startX, startY),
             cv::Point(endX, endY),
             Scalar(255,255,255),
-            rng.uniform(0, 3), CV_AA); // anti-alias
+            rng.uniform(0, 3), CV_AA);
     }
 }
 
@@ -61,19 +61,19 @@ void transform(Mat &charImage) {
 
     cv::Point2f src[4];
     src[0] = cv::Point2f(0, 0);
-    src[1] = cv::Point2f(0, CHAR_HEIGHT);
-    src[2] = cv::Point2f(CHAR_WIDTH, 0);
-    src[3] = cv::Point2f(CHAR_WIDTH, CHAR_HEIGHT);
+    src[1] = cv::Point2f(0, HEIGHT);
+    src[2] = cv::Point2f(WIDTH, 0);
+    src[3] = cv::Point2f(WIDTH, HEIGHT);
 
     cv::Point2f dst[4];
     dst[0] = cv::Point2f(0, 0);
-    dst[1] = cv::Point2f(0, CHAR_HEIGHT);
-    dst[2] = cv::Point2f(CHAR_WIDTH, 0);
+    dst[1] = cv::Point2f(0, HEIGHT);
+    dst[2] = cv::Point2f(WIDTH, 0);
 
-    int varWidth  = CHAR_WIDTH / 2;
-    int varHeight = CHAR_HEIGHT / 2;
-    int widthWarp  = CHAR_WIDTH - varWidth + (rand() % varWidth);
-    int heightWarp = CHAR_HEIGHT - varHeight + (rand() % varHeight);
+    int varWidth  = WIDTH / 2;
+    int varHeight = HEIGHT / 2;
+    int widthWarp  = WIDTH - varWidth + (rand() % varWidth);
+    int heightWarp = HEIGHT - varHeight + (rand() % varHeight);
     dst[3] = cv::Point2f(widthWarp, heightWarp);
 
     Mat perspectiveTranx = cv::getPerspectiveTransform(src, dst);
@@ -81,10 +81,16 @@ void transform(Mat &charImage) {
         cv::Size(charImage.cols, charImage.rows),
         INTER_CUBIC,
         BORDER_CONSTANT,
-        WHITE);
+        Scalar(255,255,255,0));
 }
 
-void addNoise(Mat &image) {
+void randomize(Mat &input, float height, float width) {
+    rotate(input, input);
+    scale(input, input, height, width);
+    transform(input);
+}
+
+void addPoints(Mat &image) {
 
     rand();
     RNG rng(rand());
@@ -98,9 +104,9 @@ void addNoise(Mat &image) {
 //        j = image.rows / 2;
         Point center(i, j);
 
-        circle(image, center, rng.uniform(1, 3),     // radius,
-            Scalar(rng.uniform(0, 256),rng.uniform(0, 256),rng.uniform(0, 256)),  // color of noise points
-            -2,                  // thickness, negative for filled
+        circle(image, center, rng.uniform(1, 3),
+            Scalar(rng.uniform(0, 256),rng.uniform(0, 256),rng.uniform(0, 256)),
+            -2,
             CV_AA);
     }
 }
@@ -122,40 +128,33 @@ void addCircle(Mat &image) {
 int main(int argc, char *argv[])
 {
     string inputWord = argv[1];
-    CAPTCHA_LENGTH = inputWord.size();
+    LENGTH = inputWord.size();
 
-    Mat outImage(CHAR_HEIGHT, CHAR_WIDTH * CAPTCHA_LENGTH, CV_8UC3, WHITE);
+    Mat outImage(HEIGHT, WIDTH * LENGTH, CV_8UC3, Scalar(255,255,255,0));
 
     srand((unsigned)time(0));
     rand();
     RNG rng(rand());
 
-    Scalar color = CV_RGB(0, 0, 0); //255, 127, 80);
+    Scalar color = CV_RGB(0, 0, 0);
 
 //    addCircle(outImage);
 
     for (std::string::size_type i = 0; i < inputWord.size(); i++) {
-        cv::Mat charImage(CHAR_HEIGHT, CHAR_WIDTH, CV_8UC3, WHITE);
+        cv::Mat charImage(HEIGHT, WIDTH, CV_8UC3, Scalar(255,255,255,0));
 
         string c(1, inputWord[i]);
-        putText(charImage, c, Point(10, CHAR_HEIGHT - 10), rng.uniform(1, 6), rng.uniform(3.0, 4.0), color, rng.uniform(1, 5), CV_AA);
+        putText(charImage, c, Point(10, HEIGHT - 10), rng.uniform(1, 6), rng.uniform(3.0, 4.0), color, rng.uniform(1, 5), CV_AA);
 
-//          imshow("1st look",charImage);
-        transform(charImage);
-//        imshow("transform",charImage);
-        rotate(charImage, charImage);
-//        imshow("rotate",charImage);
-        scale(charImage, charImage, CHAR_HEIGHT, CHAR_WIDTH);
-//        imshow("scale",charImage);
+        randomize(charImage, HEIGHT, WIDTH);
+
         if(i % (rng.uniform(1,6)) == 0) {
 
             bitwise_not(charImage, charImage);
         }
-        charImage.copyTo(outImage(cv::Rect(CHAR_WIDTH * i, 0, charImage.cols, charImage.rows)));
-//        waitKey(0);
-    }
+        charImage.copyTo(outImage(cv::Rect(WIDTH * i, 0, charImage.cols, charImage.rows)));
 
-//    addLines(outImage);
+    }
 
     cout << rand() % inputWord.size() <<endl;
 
@@ -164,12 +163,12 @@ int main(int argc, char *argv[])
     }
 
     if ((rand() % inputWord.size()) % 3 == 0) {
-        addNoise(outImage);
+        addPoints(outImage);
     }
 
 
-//    imshow("Captcha11", outImage);
-//    waitKey(0);
+    imshow("captcha", outImage);
+    waitKey(0);
     imwrite( inputWord+".jpg", outImage );
     return EXIT_SUCCESS;
 }
