@@ -9,12 +9,9 @@ using namespace std;
 using namespace cv;
 
 const Scalar WHITE = Scalar(255,255,255,0);
-int       CAPTCHA_LENGTH = 8;
+int       CAPTCHA_LENGTH;
 const int         CHAR_HEIGHT = 100;
 const int         CHAR_WIDTH  = 80;
-const string     CHARACTERS[] = {"a", "A", "b", "B", "c", "C", "D", "d", "e", "E", "f", "F", "g", "G",
-    "h", "H", "j", "J", "k", "K", "m", "M", "n", "N", "q", "Q", "R", "t", "T", "w", "W", "x", "X", "y", "Y",
-    "1", "2", "3", "4", "5", "6", "7", "8", "9"};
 
 void rotate(Mat &input, Mat &output) {
 
@@ -45,7 +42,7 @@ void scale(Mat &input, Mat &output, float height, float width) {
 void addLines(Mat &image) {
     rand();
     RNG rng(rand());
-    int numLines = CAPTCHA_LENGTH;
+    int numLines = 9;
     for ( int i = 0; i < numLines; ++i) {
         int startX = rand() % image.cols;
         int endX = rand()   % image.cols;
@@ -94,11 +91,11 @@ void addNoise(Mat &image) {
     int i,j;
     for (int n = 0; n < 100; n++) {
 
-//        i= rand() % image.cols;
-//        j= rand() % image.rows;
+        i= rand() % image.cols;
+        j= rand() % image.rows;
 
-        i = image.cols / 2;
-        j = image.rows / 2;
+//        i = image.cols / 2;
+//        j = image.rows / 2;
         Point center(i, j);
 
         circle(image, center, rng.uniform(1, 3),     // radius,
@@ -126,14 +123,12 @@ int main(int argc, char *argv[])
 {
     string inputWord = argv[1];
     CAPTCHA_LENGTH = inputWord.size();
-    int charactersSize = sizeof(CHARACTERS) / sizeof(CHARACTERS[0]);
 
     Mat outImage(CHAR_HEIGHT, CHAR_WIDTH * CAPTCHA_LENGTH, CV_8UC3, WHITE);
 
     srand((unsigned)time(0));
     rand();
     RNG rng(rand());
-    int randomChooser = rand() % inputWord.size();
 
     Scalar color = CV_RGB(0, 0, 0); //255, 127, 80);
 
@@ -152,7 +147,7 @@ int main(int argc, char *argv[])
 //        imshow("rotate",charImage);
         scale(charImage, charImage, CHAR_HEIGHT, CHAR_WIDTH);
 //        imshow("scale",charImage);
-        if(i % 2 == 0) {
+        if(i % (rng.uniform(1,6)) == 0) {
 
             bitwise_not(charImage, charImage);
         }
@@ -164,17 +159,17 @@ int main(int argc, char *argv[])
 
     cout << rand() % inputWord.size() <<endl;
 
-    if (randomChooser % 2 == 0) {
+    if ((rand() % inputWord.size()) % 2 == 0) {
         addLines(outImage);
     }
 
-    if (randomChooser == 0) {
+    if ((rand() % inputWord.size()) % 3 == 0) {
         addNoise(outImage);
     }
 
 
-    imshow("Captcha11", outImage);
-    waitKey(0);
+//    imshow("Captcha11", outImage);
+//    waitKey(0);
     imwrite( inputWord+".jpg", outImage );
     return EXIT_SUCCESS;
 }

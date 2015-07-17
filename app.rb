@@ -8,7 +8,8 @@ require 'os'
 
 register Sinatra::Synchrony
 use Rack::Session::Cookie, :secret => 'FURFM-SCHNAPS'
-
+set :bind, '0.0.0.0'
+set :port, 80
 store = Moneta.new(:Memory)
 ACCEPTED = "accepted_"
 
