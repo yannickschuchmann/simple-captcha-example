@@ -3,12 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Insert captcha</title>
+    <link href='http://fonts.googleapis.com/css?family=Lato' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="main.css"/>
 </head>
 <body>
-<img src="/captchas/<%= @phrase %>.jpg" alt=""/>
-<form action="/captcha" method="get">
-    <input type="text" name="captcha_input" placeholder="Please insert captcha code"/>
-    <button type="submit">Check captcha</button>
-</form>
+<div class="captcha">
+    <img src="/captchas/<%= @phrase %>.jpg" alt=""/>
+    <form action="/captcha" method="get">
+        <input type="text" name="captcha_input" placeholder="Please insert captcha code"/>
+        <button type="submit" class="icon-checkmark"></button>
+        <a href="/reload" class="icon-spinner11"></a>
+    </form>
+</div>
 </body>
 </html>
